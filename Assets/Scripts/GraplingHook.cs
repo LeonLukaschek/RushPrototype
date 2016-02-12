@@ -9,14 +9,18 @@ public class GraplingHook : MonoBehaviour
     public float increaseStep;
     public LayerMask mask;
     public LineRenderer line;
-    private DistanceJoint2D joint;
 
+    public bool isRoping;
+
+    private DistanceJoint2D joint;
+    private PlayerController playerC;
     private Vector3 targetPos;
     private RaycastHit2D hit;
 
     private void Start()
     {
         joint = GetComponent<DistanceJoint2D>();
+        playerC = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
 
         joint.enabled = false;
         line.enabled = false;
@@ -24,8 +28,16 @@ public class GraplingHook : MonoBehaviour
 
     private void Update()
     {
+        if (!playerC.isResetting)
+        {
+            Rope();
+        }
+    }
+
+    private void Rope()
+    {
         //Decrease the rope lenght
-        if (Input.GetKey(KeyCode.LeftShift) && joint.distance > 0.2f)
+        if (Input.GetKey(KeyCode.LeftShift) && joint.distance > 1f)
         {
             joint.distance -= decreaseStep;
         }
@@ -53,6 +65,8 @@ public class GraplingHook : MonoBehaviour
                 line.SetPosition(0, transform.position);
                 line.SetPosition(1, hit.point);
             }
+
+            isRoping = true;
         }
 
         if (Input.GetMouseButton(0))
@@ -61,8 +75,15 @@ public class GraplingHook : MonoBehaviour
         }
         if (Input.GetMouseButtonUp(0))
         {
-            joint.enabled = false;
-            line.enabled = false;
+            ResetHook();
+
+            isRoping = false;
         }
+    }
+
+    public void ResetHook()
+    {
+        joint.enabled = false;
+        line.enabled = false;
     }
 }
